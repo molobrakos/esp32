@@ -2,9 +2,15 @@ PIP_HOME_BIN=$(HOME)/.local/bin
 
 PORT=/dev/ttyUSB0
 BAUD=115200
-
 ADDRESS=0x1000
+
+# stable
 FIRMWARE=esp32-20190125-v1.10.bin
+
+# latest
+FIRMWARE=esp32-20190415-v1.10-278-g673e154df.bin
+
+FIRMWARE_URL=http://micropython.org/resources/firmware/$(FIRMWARE)
 
 SCREEN_DRIVER=ssd1306.py
 SCREEN_DRIVER_URL=https://raw.githubusercontent.com/adafruit/micropython-adafruit-ssd1306/master/$(SCREEN_DRIVER)
@@ -33,7 +39,7 @@ $(AMPY_BIN):
 	pip install --user adafruit-ampy
 
 $(FIRMWARE):
-	curl -LO http://micropython.org/resources/firmware/$@
+	curl -L -o $@ $(FIRMWARE_URL)
 
 write: $(FIRMWARE) $(ESPTOOL)
 	 $(ESPTOOL) write_flash --compress $(ADDRESS) $(FIRMWARE)
@@ -43,7 +49,7 @@ term: $(PICOCOM)
 	$(PICOCOM) $(PORT) -b$(BAUD)
 
 $(SCREEN_DRIVER):
-	curl -LO $(SCREEN_DRIVER_URL)
+	curl -L -o $@ $(SCREEN_DRIVER_URL)
 
 screen: $(SCREEN_DRIVER) | $(PORT)
 	$(AMPY) put $(SCREEN_DRIVER)
@@ -56,5 +62,5 @@ clean:
 
 deploy: | $(PORT)
 	$(AMPY) put boot.py
-	$(AMPY) put config.json
-	$(AMPY) put $(SCREEN_DRIVER)
+#	$(AMPY) put config.json
+#	$(AMPY) put $(SCREEN_DRIVER)
